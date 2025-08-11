@@ -4,7 +4,15 @@ import { AuthContext } from "../providers/AuthProvider";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaEdit, FaTrash, FaCarSide, FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaCarSide,
+} from "react-icons/fa";
+
+function getCSSVariable(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name) || "";
+}
 
 export default function MyCars() {
   const { user } = useContext(AuthContext);
@@ -23,12 +31,48 @@ export default function MyCars() {
     availability: "available",
   });
 
+  // Colors state
+  const [colors, setColors] = useState({
+    text: "#000",
+    background: "#fff",
+    primary: "#000",
+    secondary: "#000",
+    accent: "#000",
+   neutral: "#000",
+  });
+
+  useEffect(() => {
+    const updateColors = () => {
+      setColors({
+        text: getCSSVariable("--text").trim() || "#000",
+        background: getCSSVariable("--background").trim() || "#fff",
+        primary: getCSSVariable("--primary").trim() || "#000",
+        secondary: getCSSVariable("--secondary").trim() || "#000",
+        accent: getCSSVariable("--accent").trim() || "#000",
+        neutral: getCSSVariable("--neutral").trim() || "#000",
+      });
+    };
+
+    updateColors();
+
+    const observer = new MutationObserver(() => updateColors());
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   // Fetch user's cars
   const fetchMyCars = async () => {
     try {
-      const res = await axios.get("https://cars-omega-two.vercel.app/my-cars", {
-        headers: { Authorization: `Bearer ${user?.accessToken}` },
-      });
+      const res = await axios.get(
+        "https://carvia-public-server.vercel.app/my-cars",
+        {
+          headers: { Authorization: `Bearer ${user?.accessToken}` },
+        }
+      );
       setCars(res.data);
     } catch (err) {
       console.error("Error fetching cars:", err);
@@ -84,7 +128,7 @@ export default function MyCars() {
       };
 
       await axios.put(
-        `https://cars-omega-two.vercel.app/update-car/${editingCar._id}`,
+        `https://carvia-public-server.vercel.app/update-car/${editingCar._id}`,
         updatedCar,
         {
           headers: { Authorization: `Bearer ${user?.accessToken}` },
@@ -113,9 +157,12 @@ export default function MyCars() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`https://cars-omega-two.vercel.app/delete-car/${id}`, {
-          headers: { Authorization: `Bearer ${user?.accessToken}` },
-        });
+        await axios.delete(
+          `https://carvia-public-server.vercel.app/delete-car/${id}`,
+          {
+            headers: { Authorization: `Bearer ${user?.accessToken}` },
+          }
+        );
         Swal.fire("Deleted!", "Your car has been removed.", "success");
         fetchMyCars();
       } catch (err) {
@@ -127,12 +174,29 @@ export default function MyCars() {
 
   if (!cars.length) {
     return (
-      <div className="text-center mt-16 px-4">
-        <FaCarSide className="mx-auto mb-4 text-6xl text-cyan-600 animate-bounce" />
+      <div
+        className="text-center px-4 py-10"
+        style={{ color: colors.primary, backgroundColor: colors.neutral }}
+      >
+        <FaCarSide
+          className="mx-auto mb-4 text-6xl animate-bounce"
+          style={{ color: colors.accent }}
+        />
         <h2 className="text-3xl font-semibold mb-3">No Cars Added Yet</h2>
         <Link
           to="/add-car"
-          className="inline-block px-6 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition"
+          className="inline-block px-6 py-3 rounded-lg transition"
+          style={{
+            backgroundColor: colors.accent,
+            color: colors.background,
+            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = colors.primary;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = colors.accent;
+          }}
         >
           Add a Car Now
         </Link>
@@ -141,19 +205,33 @@ export default function MyCars() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 flex items-center gap-3 text-cyan-700">
-        <FaCarSide /> My Cars
+    <div
+      className=" py-10 px-4 mx-auto"
+      style={{ backgroundColor: colors.neutral, color: colors.text }}
+    >
+      <h2
+        className="text-3xl mx-12 font-bold mb-6 flex items-center gap-3 "
+        style={{ color: colors.primary }}
+      >
+         My Cars
       </h2>
 
       {/* Sorting */}
-      <div className="mb-6 flex flex-col sm:flex-row items-center gap-4 justify-between">
-        <div className="flex items-center gap-2 font-semibold text-gray-700">
+      <div className="mb-6 flex flex-col sm:flex-row items-center  mx-12 gap-4 justify-between">
+        <div
+          className="flex items-center gap-2 font-semibold"
+          style={{ color: colors.accent }}
+        >
           Sort by:
           <select
             className="select select-bordered w-48"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.secondary,
+            }}
           >
             <option value="date-desc">Date Added (Newest First)</option>
             <option value="date-asc">Date Added (Oldest First)</option>
@@ -164,11 +242,26 @@ export default function MyCars() {
       </div>
 
       {/* Cars Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
-        <table className="table-auto w-full min-w-[700px] border-collapse">
-          <thead className="bg-cyan-600 text-white">
-            <tr>
+
+
+      <div
+        className="overflow-x-auto lg:w-11/12  mx-auto rounded-lg border shadow-sm"
+        style={{ borderColor: colors.secondary }}
+      >
+        <table
+          className="table-auto  w-full min-w-[700px] border-collapse"
+          style={{ color: colors.text }}
+        >
+          <thead
+            style={{
+              backgroundColor: colors.primary,
+              color: colors.background,
+            }}
+            className="w-full px-4"
+          >
+            <tr className="w-full px-4">
               <th className="p-3 text-left">Image</th>
+        
               <th className="p-3 text-left">Model</th>
               <th className="p-3 text-left">Price/Day</th>
               <th className="p-3 text-left">Bookings</th>
@@ -186,7 +279,11 @@ export default function MyCars() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="border-b border-gray-200 hover:bg-cyan-50"
+                  className="border-b hover:bg-cyan-50"
+                  style={{
+                    borderColor: colors.secondary,
+                    backgroundColor: colors.background,
+                  }}
                 >
                   <td className="p-2">
                     <img
@@ -200,19 +297,43 @@ export default function MyCars() {
                   <td className="p-2">${car.pricePerDay}</td>
                   <td className="p-2">{car.bookingCount || 0}</td>
                   <td className="p-2 capitalize">{car.availability}</td>
-                  <td className="p-2">{new Date(car.createdAt).toLocaleDateString()}</td>
+                  <td className="p-2">
+                    {new Date(car.createdAt).toLocaleDateString()}
+                  </td>
                   <td className="p-2 flex flex-col sm:flex-row gap-2">
                     <button
                       onClick={() => handleEditClick(car)}
-                      className="flex items-center gap-2 btn btn-sm btn-warning hover:bg-yellow-400"
+                      className="flex items-center gap-2 btn btn-sm"
                       aria-label={`Edit ${car.carModel}`}
+                      style={{
+                        backgroundColor: colors.primary,
+                        color: colors.background,
+                        transition: "background-color 0.3s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = colors.accent)
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = colors.primary)
+                      }
                     >
                       <FaEdit /> Update
                     </button>
                     <button
                       onClick={() => handleDelete(car._id)}
-                      className="flex items-center gap-2 btn btn-sm btn-error hover:bg-red-600"
+                      className="flex items-center gap-2 btn btn-sm"
                       aria-label={`Delete ${car.carModel}`}
+                      style={{
+                        backgroundColor: colors.accent,
+                        color: colors.background,
+                        transition: "background-color 0.3s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = colors.primary)
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = colors.accent)
+                      }
                     >
                       <FaTrash /> Delete
                     </button>
@@ -235,12 +356,20 @@ export default function MyCars() {
           >
             <motion.form
               onSubmit={handleUpdateSubmit}
-              className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 overflow-auto max-h-[90vh]"
+              className="rounded-lg max-w-2xl w-full p-6 overflow-auto max-h-[90vh]"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
+              style={{
+                backgroundColor: colors.background,
+                color: colors.text,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+              }}
             >
-              <h3 className="text-xl font-bold mb-4 text-cyan-700 flex items-center gap-2">
+              <h3
+                className="text-xl font-bold mb-4 flex items-center gap-2"
+                style={{ color: colors.primary }}
+              >
                 <FaEdit /> Update Car Info
               </h3>
 
@@ -250,58 +379,114 @@ export default function MyCars() {
                   placeholder="Car Model"
                   className="input input-bordered w-full"
                   value={formData.carModel}
-                  onChange={(e) => setFormData({ ...formData, carModel: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, carModel: e.target.value })
+                  }
                   required
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <input
                   type="number"
                   placeholder="Price per Day"
                   className="input input-bordered w-full"
                   value={formData.pricePerDay}
-                  onChange={(e) => setFormData({ ...formData, pricePerDay: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pricePerDay: e.target.value })
+                  }
                   required
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <input
                   type="text"
                   placeholder="Availability"
                   className="input input-bordered w-full"
                   value={formData.availability}
-                  onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, availability: e.target.value })
+                  }
                   required
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <input
                   type="text"
                   placeholder="Registration Number"
                   className="input input-bordered w-full"
                   value={formData.registrationNumber}
-                  onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, registrationNumber: e.target.value })
+                  }
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <input
                   type="text"
                   placeholder="Features (comma separated)"
                   className="input input-bordered w-full"
                   value={formData.features}
-                  onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, features: e.target.value })
+                  }
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <input
                   type="text"
                   placeholder="Location"
                   className="input input-bordered w-full"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <input
                   type="url"
                   placeholder="Image URL"
                   className="input input-bordered w-full"
                   value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, imageUrl: e.target.value })
+                  }
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
                 <textarea
                   placeholder="Description"
                   className="textarea textarea-bordered w-full"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  style={{
+                    backgroundColor: colors.background + "cc",
+                    color: colors.text,
+                    borderColor: colors.secondary,
+                  }}
                 />
               </div>
 
@@ -310,10 +495,18 @@ export default function MyCars() {
                   type="button"
                   onClick={() => setEditingCar(null)}
                   className="btn btn-ghost"
+                  style={{ color: colors.primary }}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{
+                    backgroundColor: colors.primary,
+                    color: colors.background,
+                  }}
+                >
                   Save Changes
                 </button>
               </div>

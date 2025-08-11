@@ -4,10 +4,11 @@ import FeaturedCars from "../components/FeaturedCars";
 import SpecialOffers from "../components/SpecialOffers";
 
 import WhyChooseUs from "../components/WhyChooseUs";
-import CustomerReviews from "../components/CustomerReviews";
+
 import CarviaStats from "../components/CarviaStats";
 import FAQ from "../components/FAQ";
 import CarCareTips from "./CarCareTips";
+import CustomerReviews from "../components/CustomerReviews";
 
 const Home = () => {
   return (
@@ -18,7 +19,7 @@ const Home = () => {
      <FAQ /> 
      <CarCareTips />
       <SpecialOffers />
-     <CustomerReviews /> 
+    < CustomerReviews /> 
      <CarviaStats />
     </>
   );

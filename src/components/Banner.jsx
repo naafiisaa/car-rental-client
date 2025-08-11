@@ -25,7 +25,7 @@ const Banner = () => {
               View Available Cars
             </a>
             <a
-              href="/learn-more"
+              href="/about"
               className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold px-6 py-3 rounded-full transition text-center"
             >
               Learn More

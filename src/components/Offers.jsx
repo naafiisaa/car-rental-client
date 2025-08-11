@@ -31,7 +31,7 @@ const offers = [
   },
   {
     id: 4,
-    title: "First-Time Customer Offer",
+    title: "First-Time myer Offer",
     description:
       "First rental with Carvia? Get an instant 15% discount on your booking.",
     image:

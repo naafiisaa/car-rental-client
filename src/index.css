@@ -1,2 +1,26 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+:root {
+ --text: #101623;
+    --background: #e8ecf7;
+    --primary: #1a3070;
+    --secondary: #7592eb;
+    --accent: #0c3bca;
+    --neutral:#FFFFFF;
+  /* Added success and error colors */
+  --success: #22c55e;  /* Tailwind green-500 */
+  --error: #ef4444;    /* Tailwind red-500 */
+}
+
+.dark {
+  --text: #dce2ef;
+  --background: #080c17;
+  --primary: #8fa5e5;
+  --secondary:#14318a;
+  --accent:#3564f3;
+ --neutral: #17233d;
+  /* Added dark mode success and error */
+  --success: #4ade80;  /* Tailwind green-400 */
+  --error: #f87171;    /* Tailwind red-400 */
+}

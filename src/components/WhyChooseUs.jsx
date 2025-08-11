@@ -1,45 +1,87 @@
-
-import React from 'react';
-import { FaCarSide, FaDollarSign, FaHeadset, FaRegClock } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { FaCarSide, FaDollarSign, FaHeadset, FaRegClock } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const features = [
   {
-    icon: <FaCarSide className="text-4xl text-primary" />,
-    title: 'Wide Variety of Cars',
-    description: 'Choose from economy cars to premium rides tailored for every journey.',
+    iconName: "FaCarSide",
+    title: "Wide Variety of Cars",
+    description:
+      "Choose from economy cars to premium rides tailored for every journey.",
+    icon: FaCarSide,
   },
   {
-    icon: <FaDollarSign className="text-4xl text-primary" />,
-    title: 'Affordable Prices',
-    description: 'Enjoy competitive daily rates with no hidden fees.',
+    iconName: "FaDollarSign",
+    title: "Affordable Prices",
+    description: "Enjoy competitive daily rates with no hidden fees.",
+    icon: FaDollarSign,
   },
   {
-    icon: <FaRegClock className="text-4xl text-primary" />,
-    title: 'Easy Booking Process',
-    description: 'Book your perfect ride in just a few effortless steps.',
+    iconName: "FaRegClock",
+    title: "Easy Booking Process",
+    description: "Book your perfect ride in just a few effortless steps.",
+    icon: FaRegClock,
   },
   {
-    icon: <FaHeadset className="text-4xl text-primary" />,
-    title: '24/7 Support',
-    description: 'We’re here round the clock to help with all your queries.',
+    iconName: "FaHeadset",
+    title: "24/7 Support",
+    description: "We’re here round the clock to help with all your queries.",
+    icon: FaHeadset,
   },
 ];
 
+// Helper to read CSS variables dynamically
+function getCSSVariable(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 const WhyChooseUs = () => {
+  const [colors, setColors] = useState({
+    text: getCSSVariable("--text"),
+    background: getCSSVariable("--background"),
+    primary: getCSSVariable("--primary"),
+    secondary: getCSSVariable("--secondary"),
+    accent: getCSSVariable("--accent"),
+    neutral: getCSSVariable("--neutral"),
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setColors({
+        text: getCSSVariable("--text"),
+        background: getCSSVariable("--background"),
+        primary: getCSSVariable("--primary"),
+        secondary: getCSSVariable("--secondary"),
+        accent: getCSSVariable("--accent"),
+        neutral: getCSSVariable("--neutral"),
+      });
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-16 bg-gray-100" id="why-us">
+    <section
+      className="py-16"
+      style={{ backgroundColor: colors.background, color: colors.text }}
+      id="why-us"
+    >
       <div className="max-w-6xl mx-auto px-6 text-center">
-        <motion.h2 
-          className="text-4xl font-bold text-gray-800 mb-4"
+        <motion.h2
+          style={{ color: colors.text }}
+          className="text-4xl font-bold mb-4"
           initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          Why Choose <span className="text-primary">Carvia</span>?
+          Why Choose <span style={{ color: colors.primary }}>Carvia</span>?
         </motion.h2>
-        <motion.p 
-          className="text-gray-600 mb-12 max-w-2xl mx-auto"
+        <motion.p
+          style={{ color: colors.accent, fontWeight:"500" }}
+          className="mb-12 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
@@ -48,21 +90,39 @@ const WhyChooseUs = () => {
         </motion.p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((item, index) => (
-            <motion.div
-              key={index}
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index, duration: 0.5 }}
-            >
-              <div className="flex justify-center mb-4">
-                {item.icon}
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.title}</h3>
-              <p className="text-gray-600 text-sm">{item.description}</p>
-            </motion.div>
-          ))}
+          {features.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <motion.div
+                key={index}
+                className="p-6 rounded-2xl shadow-md hover:shadow-lg transition duration-300"
+                style={{
+                  backgroundColor: colors.neutral,
+                  border: `1px solid ${colors.secondary}`,
+                  color: colors.text,
+                }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index, duration: 0.5 }}
+              >
+                <div
+                  className="flex justify-center mb-4"
+                  style={{ color: colors.primary }}
+                >
+                  <Icon className="text-4xl" />
+                </div>
+                <h3
+                  style={{ color: colors.primary }}
+                  className="text-xl font-semibold mb-2"
+                >
+                  {item.title}
+                </h3>
+                <p style={{ color: colors.accent,fontWeight:"500", fontSize: "0.875rem" }}>
+                  {item.description}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -70,3 +130,6 @@ const WhyChooseUs = () => {
 };
 
 export default WhyChooseUs;
+
+
+

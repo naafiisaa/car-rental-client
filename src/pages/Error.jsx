@@ -34,7 +34,7 @@ const Error = () => {
 
                 {/* Animated descriptive paragraph */}
                 <motion.p
-                    className="text-red-600 mb-6"
+                    className="text-primary mb-6"
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
@@ -49,7 +49,7 @@ const Error = () => {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.5 }}
                 >
-                    <Link to="/" className="btn text-white bg-red-600">
+                    <Link to="/" className="btn text-white bg-primary">
                         Go Back Home
                     </Link>
                 </motion.div>

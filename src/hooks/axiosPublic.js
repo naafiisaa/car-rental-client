@@ -2,7 +2,7 @@ import axios from "axios";
 
 const useAxiosPublic = () => {
   const instance = axios.create({
-    baseURL: "https://cars-omega-two.vercel.app/",
+    baseURL: "https://carvia-public-server.vercel.app/",
   });
 
   return instance;

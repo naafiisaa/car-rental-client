@@ -13,6 +13,10 @@ import PrivateRoute from "../routers/PrivateRoute";
 import CarDetails from "../pages/CarDetails";
 import LearnMore from "../pages/LearnMore";
 import HolidayDeal from "../pages/HolidayDeal";
+import AboutUs from "../pages/AboutUs";
+import Blogs from "../pages/Blogs";
+import ContactUs from "../pages/ContactUs";
+import Blog from "../pages/Blog";
 
 const mainRoutes = createBrowserRouter([
   {
@@ -40,7 +44,22 @@ const mainRoutes = createBrowserRouter([
         path: "/learn-more", // Register page route
         Component: LearnMore,
       },
-
+ {
+        path: "/about", // Register page route
+        element: <AboutUs/>
+      },
+       {
+        path: "/blogs", // Register page route
+        element: <Blogs />
+      },
+       {
+       path :"/blogs/:id", // Register page route
+        element: <Blog/>
+      },
+       {
+        path: "/contact", // Register page route
+        element: <ContactUs />
+      },
       {
         path: "/add-car", // Protected route to add car
         element: (

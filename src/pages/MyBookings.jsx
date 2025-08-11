@@ -15,8 +15,41 @@ import {
 } from 'recharts';
 import Loading from './Loading';
 
+function getCSSVariable(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name) || '';
+}
+
 export default function MyBookings() {
   const { user } = useContext(AuthContext);
+
+  const [colors, setColors] = useState({
+    text: '#000',
+    background: '#fff',
+    primary: '#000',
+    secondary: '#000',
+    accent: '#000',
+    neutral:"#000",
+  });
+
+  useEffect(() => {
+    const updateColors = () => {
+      setColors({
+        text: getCSSVariable('--text').trim() || '#000',
+        background: getCSSVariable('--background').trim() || '#fff',
+        primary: getCSSVariable('--primary').trim() || '#000',
+        secondary: getCSSVariable('--secondary').trim() || '#000',
+        accent: getCSSVariable('--accent').trim() || '#000',
+       neutral: getCSSVariable('--neutral').trim() || '#000',
+      });
+    };
+
+    updateColors();
+
+    const observer = new MutationObserver(() => updateColors());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
@@ -35,7 +68,7 @@ export default function MyBookings() {
           : localStorage.getItem('carvia-access-token');
 
         const res = await fetch(
-          `https://cars-omega-two.vercel.app/bookings?email=${user.email}`,
+          `https://carvia-public-server.vercel.app/bookings?email=${user.email}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -53,7 +86,7 @@ export default function MyBookings() {
 
         Promise.all(
           uniqueCarIds.map((id) =>
-            fetch(`https://cars-omega-two.vercel.app/cars/${id}`, {
+            fetch(`https://carvia-public-server.vercel.app/cars/${id}`, {
               headers: { Authorization: `Bearer ${token}` },
             }).then((res) => {
               if (!res.ok) throw new Error('Failed to fetch car data');
@@ -99,7 +132,7 @@ export default function MyBookings() {
           : localStorage.getItem('carvia-access-token');
 
         const res = await fetch(
-          `https://cars-omega-two.vercel.app/bookings/${id}?email=${user.email}`,
+          `https://carvia-public-server.vercel.app/bookings/${id}?email=${user.email}`,
           {
             method: 'DELETE',
             headers: {
@@ -133,7 +166,7 @@ export default function MyBookings() {
         : localStorage.getItem('carvia-access-token');
 
       const res = await fetch(
-        `https://cars-omega-two.vercel.app/bookings/${selectedBooking._id}?email=${user.email}`,
+        `https://carvia-public-server.vercel.app/bookings/${selectedBooking._id}?email=${user.email}`,
         {
           method: 'PATCH',
           headers: {
@@ -178,14 +211,23 @@ export default function MyBookings() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="max-w-6xl mx-auto px-4 py-10"
+      className=""
+      style={{ backgroundColor: colors.neutral, color: colors.text }}
     >
-      <h2 className="text-3xl font-bold mb-6 text-center">My Bookings</h2>
+      {/* <div className='max-w-6xl mx-auto px-4 py-10'> */}
+      <div className='lg:w-11/12 mx-auto px-4 py-10'>
+     
+      <h2 className="text-3xl font-bold mb-6 text-center" style={{ color: colors.primary }}>
+        My Bookings
+      </h2>
 
       <div className="overflow-x-auto space-y-7">
         {bookings.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-2xl font-semibold mb-4 text-center">
+            <h3
+              className="text-2xl font-semibold mb-4 text-center"
+              style={{ color: colors.accent }}
+            >
               Total Rental Price by Car Model
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -193,22 +235,32 @@ export default function MyBookings() {
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="model" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="price" fill="#3b82f6" />
+                <CartesianGrid strokeDasharray="3 3" stroke={colors.secondary} />
+                <XAxis dataKey="model" stroke={colors.text} />
+                <YAxis stroke={colors.text} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: colors.background, borderColor: colors.secondary }}
+                  itemStyle={{ color: colors.text }}
+                />
+                <Bar dataKey="price" fill={colors.primary} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         )}
 
         <table
-          className="table-auto w-full min-w-[720px] text-left text-gray-800"
+          className="table-auto w-full min-w-[720px] text-left select-none"
           role="grid"
           aria-label="My bookings table"
+          style={{ color: colors.text }}
         >
-          <thead className="bg-blue-200 text-blue-900 text-sm uppercase tracking-wider select-none">
+          <thead
+            className="text-sm uppercase tracking-wider"
+            style={{
+              backgroundColor: colors.primary + '33',
+              color: colors.primary,
+            }}
+          >
             <tr>
               <th className="p-4 min-w-[180px]">Model</th>
               <th className="p-4 min-w-[160px]">
@@ -244,19 +296,27 @@ export default function MyBookings() {
                 } hover:bg-blue-100`}
                 whileHover={{ scale: 1.03 }}
                 transition={{ type: 'spring', stiffness: 260 }}
+                style={{
+                  backgroundColor: idx % 2 === 0 ? colors.background + 'ee' : colors.background,
+                  color: colors.text,
+                }}
               >
                 <td className="p-4 font-semibold max-w-xs truncate align-middle">
                   {cars[booking.carId]?.carModel || booking.carModel || booking.model}
                 </td>
                 <td className="p-4 align-middle">
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-blue-600" aria-hidden="true" />
+                    <FaCalendarAlt className="text-blue-600" aria-hidden="true" style={{ color: colors.primary }} />
                     <span>{new Date(booking.bookingDate).toLocaleString('en-GB')}</span>
                   </div>
                 </td>
                 <td className="p-4 text-right align-middle">
                   <div className="flex items-center justify-end gap-2">
-                    <FaDollarSign className="text-green-600" aria-hidden="true" />
+                    <FaDollarSign
+                      className="text-green-600"
+                      aria-hidden="true"
+                      style={{ color: colors.accent }}
+                    />
                     <span>
                       {(() => {
                         const start = new Date(booking.startDate);
@@ -282,6 +342,20 @@ export default function MyBookings() {
                         : 'bg-green-100 text-green-700'
                     }`}
                     aria-label={`Booking status: ${booking.status || 'Confirmed'}`}
+                    style={{
+                      backgroundColor:
+                        booking.status === 'Canceled'
+                          ? '#fee2e2'
+                          : booking.status === 'Pending'
+                          ? '#fef3c7'
+                          : '#d1fae5',
+                      color:
+                        booking.status === 'Canceled'
+                          ? '#991b1b'
+                          : booking.status === 'Pending'
+                          ? '#92400e'
+                          : '#065f46',
+                    }}
                   >
                     {booking.status || 'Confirmed'}
                   </span>
@@ -292,22 +366,30 @@ export default function MyBookings() {
                 <td className="p-4 flex justify-center gap-3 align-middle">
                   <motion.button
                     onClick={() => handleEdit(booking)}
-                    className="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 rounded shadow-md"
+                    className="btn btn-sm flex items-center gap-1 rounded shadow-md"
                     aria-label="Modify booking date"
                     title="Modify booking date"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    style={{
+                      backgroundColor: colors.primary,
+                      color: colors.background,
+                    }}
                   >
                     <FaEdit />
                     Modify
                   </motion.button>
                   <motion.button
                     onClick={() => handleCancel(booking._id)}
-                    className="btn btn-sm bg-red-600 hover:bg-red-700 text-white flex items-center gap-1 rounded shadow-md"
+                    className="btn btn-sm flex items-center gap-1 rounded shadow-md"
                     aria-label="Cancel booking"
                     title="Cancel booking"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    style={{
+                      backgroundColor: colors.accent,
+                      color: colors.background,
+                    }}
                   >
                     <FaTrash />
                     Cancel
@@ -319,17 +401,23 @@ export default function MyBookings() {
         </table>
 
         {bookings.length === 0 && (
-          <p className="text-center mt-8 text-gray-500">You have no bookings yet.</p>
+          <p className="text-center mt-8" style={{ color: colors.secondary }}>
+            You have no bookings yet.
+          </p>
         )}
       </div>
 
       {/* Modal for editing booking dates */}
-      <dialog id="edit_modal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Modify Booking Dates</h3>
+      <dialog id="edit_modal" className="modal" style={{ color: colors.text }}>
+        <div className="modal-box" style={{ backgroundColor: colors.background }}>
+          <h3 className="font-bold text-lg mb-4" style={{ color: colors.primary }}>
+            Modify Booking Dates
+          </h3>
 
           <label className="label" htmlFor="startDate">
-            <span className="label-text">Start Date</span>
+            <span className="label-text" style={{ color: colors.text }}>
+              Start Date
+            </span>
           </label>
           <input
             id="startDate"
@@ -337,10 +425,17 @@ export default function MyBookings() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="input input-bordered w-full mb-2"
+            style={{
+              backgroundColor: colors.background + 'cc',
+              color: colors.text,
+              borderColor: colors.secondary,
+            }}
           />
 
           <label className="label" htmlFor="endDate">
-            <span className="label-text">End Date</span>
+            <span className="label-text" style={{ color: colors.text }}>
+              End Date
+            </span>
           </label>
           <input
             id="endDate"
@@ -348,11 +443,19 @@ export default function MyBookings() {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             className="input input-bordered w-full"
+            style={{
+              backgroundColor: colors.background + 'cc',
+              color: colors.text,
+              borderColor: colors.secondary,
+            }}
           />
 
           {/* Total price preview */}
           {startDate && endDate && selectedBooking?.pricePerDay && (
-            <div className="mt-4 p-3 rounded bg-base-200 text-sm text-gray-700">
+            <div
+              className="mt-4 p-3 rounded bg-base-200 text-sm"
+              style={{ backgroundColor: colors.secondary + '33', color: colors.text }}
+            >
               {(() => {
                 const start = new Date(startDate);
                 const end = new Date(endDate);
@@ -371,7 +474,11 @@ export default function MyBookings() {
           )}
 
           <div className="modal-action">
-            <button onClick={handleUpdate} className="btn btn-primary">
+            <button
+              onClick={handleUpdate}
+              className="btn btn-primary"
+              style={{ backgroundColor: colors.primary, color: colors.background }}
+            >
               Save
             </button>
             <form method="dialog">
@@ -380,7 +487,9 @@ export default function MyBookings() {
           </div>
         </div>
       </dialog>
+      </div>
     </motion.div>
   );
 }
+
 

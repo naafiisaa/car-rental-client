@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 const useAxiosSecure = () => {
   const instance = axios.create({
-    baseURL: "https://cars-omega-two.vercel.app/",
+    baseURL: "https://carvia-public-server.vercel.app/",
   });
 
   // Attach token from localStorage to every request
